@@ -23,34 +23,21 @@ public class CourseController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseEntity> getOne(@PathVariable Long id) {
-        CourseEntity entity = this.courseService.getOne(id);
-        return ResponseEntity.status(HttpStatus.OK).body(entity);
+        return ResponseEntity.status(HttpStatus.OK).body(this.courseService.getOne(id));
     }
 
     @PostMapping
-    public ResponseEntity<String> register(@RequestBody CourseEntity course) {
-        Boolean result = this.courseService.register(course);
-
-        return result ?
-                ResponseEntity.status(HttpStatus.CREATED).body("Course was saved") :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course was not saved");
+    public ResponseEntity<Boolean> register(@RequestBody CourseEntity course) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.courseService.register(course));
     }
 
     @PutMapping
-    public ResponseEntity<String> update(@RequestBody CourseEntity course) {
-        Boolean result = this.courseService.update(course);
-
-        return result ?
-                ResponseEntity.status(HttpStatus.OK).body("Course was updated") :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course was not updated");
+    public ResponseEntity<Boolean> update(@RequestBody CourseEntity course) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.courseService.update(course));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-        Boolean result = this.courseService.delete(id);
-
-        return result ?
-                ResponseEntity.status(HttpStatus.OK).body("Course was deleted") :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course was not deleted");
+    public ResponseEntity<Boolean> delete(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.courseService.delete(id));
     }
 }
