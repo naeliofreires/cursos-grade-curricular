@@ -1,14 +1,65 @@
 package com.cursos.client.escola.grandecurricular.handler;
 
 import com.cursos.client.escola.grandecurricular.exception.CourseException;
+import com.cursos.client.escola.grandecurricular.model.ErrorMapResponse;
 import com.cursos.client.escola.grandecurricular.model.ErrorResponse;
 import com.cursos.client.escola.grandecurricular.model.ErrorResponse.ErrorResponseBuilder;
+import com.cursos.client.escola.grandecurricular.model.ErrorMapResponse.ErrorMapResponseBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ControllerAdvice
 public class ResourceHandler {
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorMapResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException) {
+
+        /**
+         * Creating a Map<String, String>
+         * and after that, we will mapping all errors for inside of the Map
+         */
+        Map<String, String> errorsMap = new HashMap<>();
+
+        /**
+         * mapping all errors for inside of the errorsMap
+         */
+        methodArgumentNotValidException
+                .getBindingResult()
+                .getAllErrors()
+                .forEach(objectError -> {
+
+                    String field = ((FieldError) objectError).getField();
+                    String value = objectError.getDefaultMessage();
+
+                    errorsMap.put(field, value);
+                });
+
+        /**
+         * Creating ErrorMapResponse.build();
+         * Obs: don't forget @Builder on model/ErrorMapResponse.class
+         */
+        ErrorMapResponseBuilder errorMapResponseBuild = ErrorMapResponse.builder();
+
+        /**
+         * assigning props for the object to build an ErrorMapResponse
+         */
+        errorMapResponseBuild
+                .errors(errorsMap)
+                .timeStamp(System.currentTimeMillis())
+                .httpStatus(HttpStatus.BAD_REQUEST.value());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorMapResponseBuild.build());
+    }
 
     @ExceptionHandler(CourseException.class)
     public ResponseEntity<ErrorResponse> handleCourseException(CourseException courseException) {

@@ -17,17 +17,22 @@ public class CourseService implements ICourseService {
 
     static final String ERROR_SERVER_MESSAGE = "an internal server error occurred";
 
+    private ModelMapper mapper;
+    private final ICourseRepository iCourseRepository;
+
     @Autowired
-    private ICourseRepository iCourseRepository;
+    CourseService(ICourseRepository iCourseRepository) {
+        this.mapper = new ModelMapper();
+        this.iCourseRepository = iCourseRepository;
+    }
 
     @Override
     public Boolean register(CourseDTO course) {
         try {
-            ModelMapper mapper = new ModelMapper();
-            CourseEntity courseEntity = mapper.map(course, CourseEntity.class);
+            CourseEntity courseEntity = this.mapper.map(course, CourseEntity.class);
 
             this.iCourseRepository.save(courseEntity);
-            return true;
+            return Boolean.TRUE;
         } catch (CourseException courseException) {
             throw courseException;
         } catch (Exception e) {
@@ -41,15 +46,14 @@ public class CourseService implements ICourseService {
             Optional<CourseEntity> optionalCourseEntity = this.iCourseRepository.findById(course.getId());
 
             if (optionalCourseEntity.isPresent()) {
-                ModelMapper mapper = new ModelMapper();
 
-                CourseEntity courseEntity = mapper.map(course, CourseEntity.class);
+                CourseEntity courseEntity = this.mapper.map(course, CourseEntity.class);
 
                 this.iCourseRepository.save(courseEntity);
 
-                return true;
+                return Boolean.TRUE;
             }
-            return false;
+            throw new CourseException(ERROR_SERVER_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (CourseException courseException) {
             throw courseException;
         } catch (Exception e) {
@@ -76,7 +80,7 @@ public class CourseService implements ICourseService {
         try {
             this.getOne(id);
             this.iCourseRepository.deleteById(id);
-            return true;
+            return Boolean.TRUE;
         } catch (CourseException courseException) {
             throw courseException;
         } catch (Exception e) {
