@@ -1,8 +1,10 @@
 package com.cursos.client.escola.grandecurricular.service;
 
+import com.cursos.client.escola.grandecurricular.dto.CourseDTO;
 import com.cursos.client.escola.grandecurricular.entity.CourseEntity;
 import com.cursos.client.escola.grandecurricular.exception.CourseException;
 import com.cursos.client.escola.grandecurricular.repository.ICourseRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,12 @@ public class CourseService implements ICourseService {
     private ICourseRepository iCourseRepository;
 
     @Override
-    public Boolean register(CourseEntity course) {
+    public Boolean register(CourseDTO course) {
         try {
-            this.iCourseRepository.save(course);
+            ModelMapper mapper = new ModelMapper();
+            CourseEntity courseEntity = mapper.map(course, CourseEntity.class);
+
+            this.iCourseRepository.save(courseEntity);
             return true;
         } catch (CourseException courseException) {
             throw courseException;
@@ -31,18 +36,20 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public Boolean update(CourseEntity course) {
+    public Boolean update(CourseDTO course) {
         try {
-            CourseEntity coursedFounded = this.getOne(course.getId());
+            Optional<CourseEntity> optionalCourseEntity = this.iCourseRepository.findById(course.getId());
 
-            coursedFounded.setName(course.getName());
-            coursedFounded.setHours(course.getHours());
-            coursedFounded.setCode(course.getCode());
-            coursedFounded.setFrequency(course.getFrequency());
+            if (optionalCourseEntity.isPresent()) {
+                ModelMapper mapper = new ModelMapper();
 
-            this.iCourseRepository.save(coursedFounded);
+                CourseEntity courseEntity = mapper.map(course, CourseEntity.class);
 
-            return true;
+                this.iCourseRepository.save(courseEntity);
+
+                return true;
+            }
+            return false;
         } catch (CourseException courseException) {
             throw courseException;
         } catch (Exception e) {

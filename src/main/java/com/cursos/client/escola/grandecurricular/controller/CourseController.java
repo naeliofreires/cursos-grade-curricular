@@ -1,5 +1,6 @@
 package com.cursos.client.escola.grandecurricular.controller;
 
+import com.cursos.client.escola.grandecurricular.dto.CourseDTO;
 import com.cursos.client.escola.grandecurricular.entity.CourseEntity;
 import com.cursos.client.escola.grandecurricular.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -27,12 +29,12 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<Boolean> register(@RequestBody CourseEntity course) {
+    public ResponseEntity<Boolean> register(@Valid @RequestBody CourseDTO course) {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.courseService.register(course));
     }
 
     @PutMapping
-    public ResponseEntity<Boolean> update(@RequestBody CourseEntity course) {
+    public ResponseEntity<Boolean> update(@Valid @RequestBody CourseDTO course) {
         return ResponseEntity.status(HttpStatus.OK).body(this.courseService.update(course));
     }
 
