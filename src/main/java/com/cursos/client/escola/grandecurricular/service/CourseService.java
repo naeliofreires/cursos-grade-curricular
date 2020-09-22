@@ -6,18 +6,22 @@ import com.cursos.client.escola.grandecurricular.exception.CourseException;
 import com.cursos.client.escola.grandecurricular.repository.ICourseRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+// When it's enabled. You don't need of [value = KEY_CACHE] in all annotations for the cache
+// @CacheConfig(cacheNames = {"course" })
 @Service
 public class CourseService implements ICourseService {
 
+    static final String KEY_CACHE = "course";
     static final String ERROR_SERVER_MESSAGE = "an internal server error occurred";
 
-    private ModelMapper mapper;
+    private final ModelMapper mapper;
     private final ICourseRepository iCourseRepository;
 
     @Autowired
@@ -40,6 +44,11 @@ public class CourseService implements ICourseService {
         }
     }
 
+    //    @Caching(evict = {
+    //            @CacheEvict(value = "course", key = "#course.id")
+    //            @CacheEvict(value = "other", key = "#other.id")
+    //    })
+    @CacheEvict(value = KEY_CACHE, key = "#course.id") // always clean the cache
     @Override
     public Boolean update(CourseDTO course) {
         try {
@@ -61,6 +70,7 @@ public class CourseService implements ICourseService {
         }
     }
 
+    @Cacheable(value = KEY_CACHE, key = "#id")
     @Override
     public CourseEntity getOne(Long id) {
         try {
@@ -88,6 +98,8 @@ public class CourseService implements ICourseService {
         }
     }
 
+    // @CachePut always will check if there are any changes on the result
+    @CachePut(value = KEY_CACHE, unless = "#result.size()<3")
     @Override
     public List<CourseEntity> getAll() {
         try {
