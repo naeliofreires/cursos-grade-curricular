@@ -75,11 +75,12 @@ public class CourseService implements ICourseService {
 
     @Cacheable(value = KEY_CACHE, key = "#id")
     @Override
-    public CourseEntity getOne(Long id) {
+    public CourseDTO getOne(Long id) {
         try {
             Optional<CourseEntity> optional = this.iCourseRepository.findById(id);
-            if (optional.isPresent())
-                return optional.get();
+            if (optional.isPresent()){
+                return mapper.map(optional.get(),CourseDTO.class);
+            }
             throw new CourseException("course does not found", HttpStatus.NOT_FOUND);
         } catch (CourseException courseException) {
             throw courseException;
@@ -101,7 +102,9 @@ public class CourseService implements ICourseService {
         }
     }
 
-    // @CachePut always will check if there are any changes on the result
+    /**
+     * @CachePut always will check if there are any changes on the result
+     */
     @CachePut(value = KEY_CACHE, unless = "#result.size()<3")
     @Override
     public List<CourseDTO> getAll() {

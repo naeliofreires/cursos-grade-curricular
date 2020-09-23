@@ -1,7 +1,6 @@
 package com.cursos.client.escola.grandecurricular.controller;
 
 import com.cursos.client.escola.grandecurricular.dto.CourseDTO;
-import com.cursos.client.escola.grandecurricular.entity.CourseEntity;
 import com.cursos.client.escola.grandecurricular.model.Response;
 import com.cursos.client.escola.grandecurricular.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import java.util.List;
 public class CourseController {
 
     private static final String DELETE = "DELETE";
+    private static final String UPDATE = "UPDATE";
 
     @Autowired
     private CourseService courseService;
@@ -40,11 +40,12 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response<CourseEntity>> getOne(@PathVariable Long id) {
-        Response<CourseEntity> response = new Response<>();
+    public ResponseEntity<Response<CourseDTO>> getOne(@PathVariable Long id) {
+        Response<CourseDTO> response = new Response<>();
+        CourseDTO courseDTO = this.courseService.getOne(id);
 
+        response.setData(courseDTO);
         response.setStatusCode(HttpStatus.OK.value());
-        response.setData(this.courseService.getOne(id));
 
         response
                 .add(WebMvcLinkBuilder
@@ -58,6 +59,12 @@ public class CourseController {
                                 .methodOn(CourseController.class)
                                 .delete(id))
                         .withRel(DELETE));
+        response
+                .add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder
+                                .methodOn(CourseController.class)
+                                .update(courseDTO))
+                        .withRel(UPDATE));
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
