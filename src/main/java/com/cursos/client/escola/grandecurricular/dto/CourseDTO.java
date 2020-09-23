@@ -1,15 +1,18 @@
 package com.cursos.client.escola.grandecurricular.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+@EqualsAndHashCode(callSuper = false)
 @Data
 @NoArgsConstructor
-public class CourseDTO {
+public class CourseDTO extends RepresentationModel<CourseDTO> {
 
     private Long id;
 

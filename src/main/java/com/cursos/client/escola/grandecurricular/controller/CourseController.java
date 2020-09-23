@@ -2,8 +2,10 @@ package com.cursos.client.escola.grandecurricular.controller;
 
 import com.cursos.client.escola.grandecurricular.dto.CourseDTO;
 import com.cursos.client.escola.grandecurricular.entity.CourseEntity;
+import com.cursos.client.escola.grandecurricular.model.Response;
 import com.cursos.client.escola.grandecurricular.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +17,49 @@ import java.util.List;
 @RequestMapping("/course")
 public class CourseController {
 
+    private static final String DELETE = "DELETE";
+
     @Autowired
     private CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<List<CourseEntity>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(this.courseService.getAll());
+    public ResponseEntity<Response<List<CourseDTO>>> getAll() {
+        Response<List<CourseDTO>> response = new Response();
+
+        response.setStatusCode(HttpStatus.OK.value());
+        response.setData(this.courseService.getAll());
+
+        response
+                .add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder
+                                .methodOn(CourseController.class)
+                                .getAll())
+                        .withSelfRel());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseEntity> getOne(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.courseService.getOne(id));
+    public ResponseEntity<Response<CourseEntity>> getOne(@PathVariable Long id) {
+        Response<CourseEntity> response = new Response<>();
+
+        response.setStatusCode(HttpStatus.OK.value());
+        response.setData(this.courseService.getOne(id));
+
+        response
+                .add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder
+                                .methodOn(CourseController.class)
+                                .getOne(id))
+                        .withSelfRel());
+        response
+                .add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder
+                                .methodOn(CourseController.class)
+                                .delete(id))
+                        .withRel(DELETE));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping

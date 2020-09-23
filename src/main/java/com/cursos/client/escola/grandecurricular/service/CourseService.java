@@ -1,12 +1,15 @@
 package com.cursos.client.escola.grandecurricular.service;
 
+import com.cursos.client.escola.grandecurricular.controller.CourseController;
 import com.cursos.client.escola.grandecurricular.dto.CourseDTO;
 import com.cursos.client.escola.grandecurricular.entity.CourseEntity;
 import com.cursos.client.escola.grandecurricular.exception.CourseException;
 import com.cursos.client.escola.grandecurricular.repository.ICourseRepository;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.*;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -101,9 +104,28 @@ public class CourseService implements ICourseService {
     // @CachePut always will check if there are any changes on the result
     @CachePut(value = KEY_CACHE, unless = "#result.size()<3")
     @Override
-    public List<CourseEntity> getAll() {
+    public List<CourseDTO> getAll() {
         try {
-            return this.iCourseRepository.findAll();
+            /**
+             * applying DTO model
+             */
+            List<CourseDTO> courseDTOList =
+                    this.mapper
+                            .map(this.iCourseRepository.findAll(), new TypeToken<List<CourseDTO>>() {
+                            }.getType());
+
+            /**
+             * applying hyper media [HATEOAS]
+             */
+            courseDTOList.forEach(courseDTO -> {
+                courseDTO
+                        .add(WebMvcLinkBuilder
+                                .linkTo(WebMvcLinkBuilder
+                                        .methodOn(CourseController.class)
+                                        .getOne(courseDTO.getId())).withSelfRel());
+            });
+
+            return courseDTOList;
         } catch (CourseException courseException) {
             throw courseException;
         } catch (Exception e) {

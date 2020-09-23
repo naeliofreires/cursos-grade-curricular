@@ -15,5 +15,5 @@ public interface ICourseService {
 
     public CourseEntity getOne(final Long id);
 
-    public List<CourseEntity> getAll();
+    public List<CourseDTO> getAll();
 }
